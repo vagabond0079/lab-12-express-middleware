@@ -11,8 +11,8 @@ mongoose.connect(process.env.MONGODB_URI);
 let server;
 const app = express();
 
-// app.use(require('../route/transaction-router.js'));
-// app.use(require('./error-middleware.js'));
+app.use(require('../route/transaction-router.js'));
+app.use(require('./error-middleware.js'));
 
 let serverControl = module.exports = {};
 
