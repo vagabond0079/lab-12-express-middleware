@@ -47,8 +47,8 @@ describe('testing transaction-router', () => {
       return superagent.post(`${API_URL}/api/transactions`)
       .catch(res => {
         expect(res.status).toEqual(400);
-      })
-    })
+      });
+    });
     it('should respond with 409 for a uniqueID conflict', () => {
       return superagent.post(`${API_URL}/api/transactions`)
       .send({
@@ -61,25 +61,119 @@ describe('testing transaction-router', () => {
       })
       .catch(res => {
         expect(res.status).toEqual(409);
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe('testing GET router', () => {
-    afterEach(Transaction.remove({}));
+    afterEach(() => Transaction.remove({}));
     beforeEach(() => {
       return new Transaction({
         name: 'testName',
         sendingBankRouting: Math.floor(Math.random()*1000000000),
         receivingBankRouting: Math.floor(Math.random()*1000000000),
         amount: 1000,
-        timestamp: Date.now(),
         uniqueID: uuidv4(),
+      })
+      .save()
+      .then(transaction => {
+        testTransaction = transaction;
       });
     });
     it('should return 404 for an invalid ID', () => {
-      return superagent.get()
-    })
+      return superagent.get(`${API_URL}/api/transactions/123123`)
+      .catch(res => {
+        expect(res.status).toEqual(404);
+      });
+    });
+    it('should return 200 and transaction data', () => {
+      return superagent.get(`${API_URL}/api/transactions/${testTransaction._id}`)
+      .then(res => {
+        expect(res.status).toEqual(200);
+        expect(res.body.name).toEqual(testTransaction.name);
+        expect(res.body.sendingBankRouting).toEqual(testTransaction.sendingBankRouting);
+        expect(res.body.receivingBankRouting).toEqual(testTransaction.receivingBankRouting);
+        expect(res.body.amount).toEqual(testTransaction.amount);
+        expect(res.body.timestamp).toExist();
+        expect(res.body.uniqueID).toEqual(testTransaction.uniqueID);
+        expect(res.body._id).toExist();
+      });
+    });
   });
 
+
+  describe('testing PUT router', () => {
+    afterEach(() => Transaction.remove({}));
+    beforeEach(() => {
+      return new Transaction({
+        name: 'testName',
+        sendingBankRouting: Math.floor(Math.random()*1000000000),
+        receivingBankRouting: Math.floor(Math.random()*1000000000),
+        amount: 1000,
+        uniqueID: uuidv4(),
+      })
+      .save()
+      .then(transaction => {
+        testTransaction = transaction;
+      });
+    });
+    it('should return 404 for an invalid ID', () => {
+      return superagent.put(`${API_URL}/api/transactions/123123`)
+      .send({name: 'testPUTName'})
+      .catch(res => {
+        expect(res.status).toEqual(404);
+      });
+    });
+    it('should return 400 for invalid body', () => {
+      return superagent.put(`${API_URL}/api/transactions/${testTransaction._id}`)
+      .send()
+      .catch(res => {
+        expect(res.status).toEqual(400);
+      });
+    });
+    it('should return 200 and updated transaction data', () => {
+      return superagent.put(`${API_URL}/api/transactions/${testTransaction._id}`)
+      .send({name: 'putUpdatedName'})
+      .then(res => {
+        console.log('testTransaction.name', testTransaction.name);
+        expect(res.status).toEqual(200);
+        expect(res.body.name).toEqual('putUpdatedName');
+        expect(res.body.sendingBankRouting).toEqual(testTransaction.sendingBankRouting);
+        expect(res.body.receivingBankRouting).toEqual(testTransaction.receivingBankRouting);
+        expect(res.body.amount).toEqual(testTransaction.amount);
+        expect(res.body.timestamp).toExist();
+        expect(res.body.uniqueID).toEqual(testTransaction.uniqueID);
+        expect(res.body._id).toExist();
+      });
+    });
+  });
+
+  describe('testing DELETE router', () => {
+    afterEach(() => Transaction.remove({}));
+    beforeEach(() => {
+      return new Transaction({
+        name: 'testName',
+        sendingBankRouting: Math.floor(Math.random()*1000000000),
+        receivingBankRouting: Math.floor(Math.random()*1000000000),
+        amount: 1000,
+        uniqueID: uuidv4(),
+      })
+      .save()
+      .then(transaction => {
+        testTransaction = transaction;
+      });
+    });
+    it('should return 404 for an invalid ID', () => {
+      return superagent.delete(`${API_URL}/api/transactions/123123`)
+      .catch(res => {
+        expect(res.status).toEqual(404);
+      });
+    });
+    it('should return 204 for valid ID', () => {
+      return superagent.delete(`${API_URL}/api/transactions/${testTransaction._id}`)
+      .then(res => {
+        expect(res.status).toEqual(204);
+      });
+    });
+  });
 });

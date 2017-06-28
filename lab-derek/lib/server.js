@@ -21,7 +21,7 @@ serverControl.start = () => {
     if(!server || !server.isOn){
       server = app.listen(process.env.PORT, () => {
         console.log('server is up on ', process.env.PORT);
-        server.isON = true;
+        server.isOn = true;
         resolve();
       });
       return;
@@ -33,13 +33,13 @@ serverControl.start = () => {
 serverControl.stop = () => {
   return new Promise((resolve, reject) => {
     if(server && server.isOn){
-      server.close( () => {
+      server.close(() => {
         console.log('server is down');
         server.isOn = false;
         resolve();
       });
       return;
     }
-    reject();
+    reject('lulwat');
   });
 };

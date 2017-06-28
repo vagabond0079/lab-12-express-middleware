@@ -17,7 +17,7 @@ const transactionSchema = mongoose.Schema({
   sendingBankRouting: {type: Number, required: true},
   receivingBankRouting: {type: Number, required: true},
   amount: {type: Number, required: true},
-  timestamp: {type: Date, default: Date.now()},
+  timestamp: {type: Date, default: Date.now().toString()},
   uniqueID: {type: String, required: true, unique: true},
 });
 
